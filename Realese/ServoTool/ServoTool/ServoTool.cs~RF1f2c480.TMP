@@ -1,0 +1,586 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.IO;
+using CollectSmplData;
+using MTS;
+
+namespace ServoTool
+{
+    public partial class ServoTool : Form
+    {
+        itri2fanucWrapper Itri2Fanuc = new itri2fanucWrapper();
+        MTS_func mts;
+        ushort CncHndl;
+        //public List<List<float>> DataList = new List<List<float>>();
+        public Label[] LblAxisArry;
+        public Label[] LblTypeArry;
+        public Label[] LblUnitArry;
+        public short NumOfChanl = 0;
+        public string[] SmplType = new string[8], SmplUnit = new string[8], SmplAxis = new string[8];
+        short AxisCount = 0;
+        List<string> StrAxisList = new List<string>();
+        // List<int> MarkTime = new List<int>(), SeqTime = new List<int>();
+        // List<long> MarkSeq = new List<long>();
+        // long LastSeq = 0;
+
+        private StreamWriter Smplsw;
+        private int DataIndex;
+        private decimal SmplPeriod = 1;
+        private short SmplShift = 0;
+        public ServoTool()
+        {
+            InitializeComponent();
+            mts = new MTS_func();
+            //TB_IP.Text = "140.96.24.133";
+            //TB_IP.Text = "192.168.220.1";
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            CB_Axis.SelectedIndex = 0;
+            CB_Type.SelectedIndex = 0;
+            CB_Unit.SelectedIndex = 0;
+            CB_FrqAxis.SelectedIndex = 0;
+            LblAxisArry = new Label[8] { label_Axis1, label_Axis2, label_Axis3, label_Axis4, label_Axis5, label_Axis6, label_Axis7, label_Axis8 };
+            LblTypeArry = new Label[8] { label_Type1, label_Type2, label_Type3, label_Type4, label_Type5, label_Type6, label_Type7, label_Type8 };
+            LblUnitArry = new Label[8] { label_Unit1, label_Unit2, label_Unit3, label_Unit4, label_Unit5, label_Unit6, label_Unit7, label_Unit8 };
+        }
+
+        private void Btn_Connect_Click(object sender, EventArgs e)
+        {
+            if (Btn_Connect.Text == "Connect")
+            {
+                string ip = TB_IP.Text;
+                ushort port = ushort.Parse(TB_Port.Text);
+                int timeout = 3;
+                CncHndl = Itri2Fanuc.Connect(ip, port, timeout);
+                if (CncHndl != 2)
+                {
+                    TB_ConStatus.Text = "Connect";
+                    Btn_Connect.Text = "DisConnect";
+                    TB_ConStatus.BackColor = Color.Green;
+                    Btn_Set.Enabled = true;
+                    Btn_Delete.Enabled = true;
+                    Btn_Start.Enabled = true;
+                    Btn_RdPrm.Enabled = true;
+                    Btn_WrPrm.Enabled = true;
+                    Btn_UploadCode.Enabled = true;
+                    Btn_DownloadCode.Enabled = true;
+                    Btn_FrqResStart.Enabled = true;
+                    TB_IP.Enabled = false;
+                    TB_Port.Enabled = false;
+                }
+                else if (CncHndl == 2)
+                {
+                    MessageBox.Show("Connect failed", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            else if (Btn_Connect.Text == "DisConnect")
+            {
+                string ret = Itri2Fanuc.DisConnect(CncHndl);
+                if (ret == "EW_OK")
+                {
+                    for (int i = 0; i < NumOfChanl; i++)
+                    {
+                        SmplType[i] = null;
+                        SmplAxis[i] = null;
+                        LblAxisArry[i].Visible = false;
+                        LblTypeArry[i].Visible = false;
+                        LblUnitArry[i].Visible = false;
+                    }
+                    StrAxisList.Clear();
+                    AxisCount = 0;
+                    NumOfChanl = 0;
+
+                    TB_ConStatus.Text = "Disconnect";
+                    Btn_Connect.Text = "Connect";
+                    TB_ConStatus.BackColor = Color.Red;
+                    Btn_Set.Enabled = false;
+                    Btn_Delete.Enabled = false;
+                    Btn_Start.Enabled = false;
+                    Btn_End.Enabled = false;
+                    Btn_RdPrm.Enabled = false;
+                    Btn_WrPrm.Enabled = false;
+                    Btn_UploadCode.Enabled = false;
+                    Btn_DownloadCode.Enabled = false;
+                    Btn_FrqResStart.Enabled = false;
+                    Btn_FrqResEnd.Enabled = false;
+                    TB_IP.Enabled = true;
+                    TB_Port.Enabled = true;
+                }
+            }
+        }
+
+        private void Btn_Set_Click(object sender, EventArgs e)
+        {
+            sbyte Axis = (sbyte)(CB_Axis.SelectedIndex + 1);
+            short Type = 0;
+            switch (CB_Type.SelectedIndex)
+            {
+                case 0:
+                    Type = 0;
+                    break;
+                case 1:
+                    Type = 1;
+                    break;
+                case 2:
+                    Type = 2;
+                    break;
+                case 3:
+                    Type = 3;
+                    break;
+                case 4:
+                    Type = 4;
+                    break;
+                case 5:
+                    Type = 31;
+                    break;
+                case 6:
+                    Type = 32;
+                    break;
+            }
+
+            if ((Axis == 1 || Axis == 2) && AxisCount >= 4)
+            {
+                MessageBox.Show("Max(X+Y)=4", "超出上限", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                string SetBool = Itri2Fanuc.SetChannelData(Axis, Type);
+                if (SetBool.Equals("EW_OK"))
+                {
+                    if ((Axis == 1 || Axis == 2)) AxisCount++;
+
+                    SmplAxis[NumOfChanl] = CB_Axis.SelectedItem.ToString();
+                    SmplType[NumOfChanl] = CB_Type.SelectedItem.ToString();
+                    SmplUnit[NumOfChanl] = CB_Unit.SelectedItem.ToString();
+
+                    StrAxisList.Add("CH" + (NumOfChanl + 1) + " [" + SmplAxis[NumOfChanl] + "-" + SmplType[NumOfChanl] + "(" + SmplUnit[NumOfChanl] + ")" + "]");
+                    LblAxisArry[NumOfChanl].Text = CB_Axis.SelectedItem.ToString();
+                    LblTypeArry[NumOfChanl].Text = CB_Type.SelectedItem.ToString();
+                    LblUnitArry[NumOfChanl].Text = CB_Unit.SelectedItem.ToString();
+                    LblAxisArry[NumOfChanl].Visible = true;
+                    LblTypeArry[NumOfChanl].Visible = true;
+                    LblUnitArry[NumOfChanl].Visible = true;
+                    NumOfChanl++;
+                }
+                else
+                    MessageBox.Show(SetBool, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void Btn_Delete_Click(object sender, EventArgs e)
+        {
+            string DelBool = Itri2Fanuc.DelChannelData();
+            if (DelBool.Equals("EW_OK"))
+            {
+                NumOfChanl--;
+                if ((SmplAxis[NumOfChanl] == "X" || SmplAxis[NumOfChanl] == "Y")) AxisCount--;
+                SmplType[NumOfChanl] = null;
+                SmplAxis[NumOfChanl] = null;
+                StrAxisList.RemoveAt(NumOfChanl);
+                LblAxisArry[NumOfChanl].Visible = false;
+                LblTypeArry[NumOfChanl].Visible = false;
+                LblUnitArry[NumOfChanl].Visible = false;
+            }
+            else
+                MessageBox.Show(DelBool, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        private void CB_Type_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CB_Unit.SelectedIndex = CB_Type.SelectedIndex;
+        }
+
+        private void checkBox_DataNum_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox_DataNum.Checked)
+            {
+                NumUpDown_DataNum.Enabled = false;
+            }
+            else
+            {
+                NumUpDown_DataNum.Enabled = true;
+            }
+        }
+
+        private void checkBox_Trigger_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox_Trigger.Checked)
+            {
+                TB_Trigger.Enabled = false;
+            }
+            else
+            {
+                TB_Trigger.Enabled = true;
+            }
+        }
+
+        private void checkBox_SmplRate_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox_SmplRate.Checked)
+            {
+                NumUpDown_Sampling.Enabled = false;                
+            }
+            else
+            {
+                NumUpDown_Sampling.Enabled = true; 
+            }
+        }
+
+        private void Btn_Start_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog path = new FolderBrowserDialog();
+            path.ShowDialog();
+            string SmplOutPath = path.SelectedPath;
+            if (SmplOutPath.Length > 0)
+            {
+                int DataNum, TriggerNum;
+                if (checkBox_DataNum.Checked)
+                {
+                    DataNum = -1;
+                }
+                else
+                {
+                    DataNum = (int)NumUpDown_DataNum.Value;
+                }
+                if (checkBox_Trigger.Checked)
+                {
+                    TriggerNum = 0;
+                }
+                else
+                {
+                    TriggerNum = int.Parse(TB_Trigger.Text);
+                }
+                if (checkBox_SmplRate.Checked)
+                {
+                    SmplShift = 512;
+                    SmplPeriod = 0.25M;
+                }
+                else
+                {
+                    SmplShift = 0;
+                    SmplPeriod = NumUpDown_Sampling.Value;
+
+                }
+                string ret = Itri2Fanuc.SamplingStart(CncHndl, DataNum, TriggerNum, SmplShift);
+                if (ret.Equals("EW_OK"))
+                {
+                    Smplsw = new StreamWriter(SmplOutPath + "\\data" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt");
+                    /*DataList.RemoveAll(it => true);
+                    for (int i = 0; i < NumOfChanl; i++)
+                    {
+                        DataList.Add(new List<float>());
+                    }*/
+                    DataIndex = 0;                        
+                    Btn_End.Enabled = true;
+                    Btn_Start.Enabled = false;
+                    NumUpDown_Sampling.Enabled = false;
+                    timer1.Enabled = true;
+                    //timer2.Enabled = true;
+                }
+                else
+                {
+                    MessageBox.Show(ret, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            string SmplStat = "3";
+            try
+            {
+                SmplStat = Itri2Fanuc.SamplingRead(CncHndl);
+            }
+            catch
+            {
+                MessageBox.Show("Memory Error(Please reboot CNC)", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                timer1.Enabled = false;
+            }
+
+            if (SmplStat.Equals("1"))
+            {
+                //DateTime CurTime = new DateTime();
+                //CurTime = DateTime.Now;
+                //MarkTime.Add((CurTime.Hour * 10000000) + (CurTime.Minute * 100000) + (CurTime.Second * 1000) + (CurTime.Millisecond));
+
+                TB_ConStatus.Text = "Sampling...";
+                if (DataIndex == 0)
+                {
+                    for (int i = 0; i < NumOfChanl; i++)
+                    {
+                        if (i == 0)
+                            Smplsw.Write(SmplAxis[i] + "-" + SmplType[i] + "(" + SmplUnit[i] + ")");
+                        else
+                            Smplsw.Write("\t" + SmplAxis[i] + "-" + SmplType[i] + "(" + SmplUnit[i] + ")");
+                    }
+                    Smplsw.Write("\tSamplingRate:" + NumUpDown_Sampling.Value + "ms");
+                    Smplsw.Write("\r\n");
+                }
+
+                for (int i = 0; i < Itri2Fanuc.DataLength; i++)
+                {
+                    if (DataIndex % Math.Ceiling(SmplPeriod) == 0)
+                    {
+                        for (int j = 0; j < NumOfChanl; j++)
+                        {
+                            if (j == 0)
+                                Smplsw.Write(Itri2Fanuc.CollectData[j, i]);
+                            else
+                                Smplsw.Write("\t" + Itri2Fanuc.CollectData[j, i]);
+                        }
+                        Smplsw.Write("\r\n");
+                    }
+                    DataIndex++;
+                }
+            }
+            else if (SmplStat.Equals("-1"))
+            {
+                TB_ConStatus.Text = "Waiting for trigger...";
+            }
+            else if (SmplStat.Equals("0"))
+            {
+                string ret = Itri2Fanuc.SamplingEnd(CncHndl);
+                if (ret.Equals("EW_OK"))
+                {
+                    TB_ConStatus.Text = "Sampling end";
+                    Smplsw.Close();
+                    Smplsw.Dispose();
+                    Btn_Start.Enabled = true;
+                    Btn_End.Enabled = false;
+                    NumUpDown_Sampling.Enabled = true;
+                    timer1.Enabled = false;
+                    //timer2.Enabled = false;
+                }
+            }
+        }
+
+        private void Btn_End_Click(object sender, EventArgs e)
+        {
+            string ret = Itri2Fanuc.SamplingCancel(CncHndl);
+            ret = Itri2Fanuc.SamplingEnd(CncHndl);
+            if (ret.Equals("EW_OK"))
+            {
+                Smplsw.Close();
+                Smplsw.Dispose();
+                timer1.Enabled = false;
+                //timer2.Enabled = false;
+                TB_ConStatus.Text = "Sampling end";
+                Btn_Start.Enabled = true;
+                NumUpDown_Sampling.Enabled = true;
+                Btn_End.Enabled = false;
+            }
+        }
+
+        private void Btn_RdPrm_Click(object sender, EventArgs e)
+        {
+            int PrmNo = int.Parse(TB_PrmNumR.Text);
+            double[] PrmVals = new double[3];
+            PrmVals = Itri2Fanuc.ReadParameterVal(CncHndl, PrmNo);
+            TB_RdPrmVal.Text = "No." + PrmNo + " ( X:" + PrmVals[0] + ",  Y:" + PrmVals[1] + ",  Z:" + PrmVals[2] + " )";
+        }
+        private void Btn_WrPrm_Click(object sender, EventArgs e)
+        {
+            short PrmAxis = short.Parse(TB_PrmAxisW.Text);
+            int PrmNo = int.Parse(TB_PrmNumW.Text);
+            int PrmVal = int.Parse(TB_PrmValW.Text);
+            String WPrmStatus = Itri2Fanuc.WriteParameterVal(CncHndl, PrmAxis, PrmNo, PrmVal);
+            if (WPrmStatus.Equals("EW_OK"))
+            {
+                double[] PrmVals = new double[3];
+                PrmVals = Itri2Fanuc.ReadParameterVal(CncHndl, PrmNo);
+                TB_WrPrmVal.Text = "No." + PrmNo + " ( X:" + PrmVals[0] + ",  Y:" + PrmVals[1] + ",  Z:" + PrmVals[2] + " )";
+            }
+            else
+                MessageBox.Show(WPrmStatus, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        private void Btn_UploadCode_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog path = new OpenFileDialog();
+            path.ShowDialog();
+            string FilePath = path.FileName;
+            if (FilePath.Length > 0)
+            {
+                string UploadStatus = Itri2Fanuc.UploadNCCode(CncHndl, FilePath);
+                if (UploadStatus.Equals("EW_OK"))
+                    TB_ConStatus.Text = "Upload completed";
+                else
+                    MessageBox.Show(UploadStatus, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                TB_ConStatus.Text = "Upload Failed(Path Error)";
+            }
+        }
+
+        private void Btn_DownloadCode_Click(object sender, EventArgs e)
+        {
+            if (TB_PrgNum.Text.Length > 0)
+            {
+                FolderBrowserDialog path = new FolderBrowserDialog();
+                path.ShowDialog();
+                string FilePath = path.SelectedPath;
+                if (FilePath.Length > 0)
+                {
+                    FilePath = FilePath + "\\O" + TB_PrgNum.Text + "_Download.Gcode";
+                    string DownloadStatus = Itri2Fanuc.DownloadNCCode(CncHndl, FilePath, int.Parse(TB_PrgNum.Text));
+                    if (DownloadStatus.Equals("EW_OK"))
+                        TB_ConStatus.Text = "Download completed";
+                    else
+                        MessageBox.Show(DownloadStatus, "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    MessageBox.Show("Download Failed (Path Error)", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            else
+                MessageBox.Show("Download Failed (Please Enter Program Number)", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        private void TB_PrgNum_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (((int)e.KeyChar < 48 | (int)e.KeyChar > 57) & (int)e.KeyChar != 8)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void Btn_FrqResStart_Click(object sender, EventArgs e)
+        {
+            /*string ret = mts.FrqResponseStart(CncHndl, 1, (int)(NumUpDown_Freqency.Value), (int)NumUpDown_InputAmp.Value, int.Parse(TB_PosGain.Text));
+            if (ret.Equals("Start input disturbance"))
+            {
+                Btn_FrqResEnd.Enabled = true;
+                Btn_FrqResStart.Enabled = false;
+            }*/
+            if (NumUpDown_FrqStart.Value > NumUpDown_FrqEnd.Value)
+            {
+                MessageBox.Show("FrqStart > FrqEnd", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            FolderBrowserDialog path = new FolderBrowserDialog();
+            path.ShowDialog();
+            string SmplOutPath = path.SelectedPath;
+            if (SmplOutPath.Length > 0)
+            {
+                Smplsw = new StreamWriter(SmplOutPath + "\\FrequencyResponse" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt");
+                TB_ConStatus.Text = "Disturbance input...";
+                DataIndex = 0;
+                timer2.Enabled = true;
+                string ret = Itri2Fanuc.FrequencyResponse(CncHndl, (sbyte)(CB_FrqAxis.SelectedIndex + 1), (int)(NumUpDown_FrqStart.Value), (int)(NumUpDown_FrqEnd.Value), (int)NumUpDown_InputAmp.Value, int.Parse(TB_PosGain.Text));
+                if (!ret.Equals("EW_OK"))
+                {
+                    TB_ConStatus.Text = ret;
+                    timer2.Enabled = false;
+                    return;
+                }
+                TB_ConStatus.Text = "Reading Data...";
+            }
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            /*long CurSeq = Itri2Fanuc.GetSeq(CncHndl);
+            if (CurSeq != LastSeq)
+            {
+                DateTime CurTime = new DateTime();
+                CurTime = DateTime.Now;
+                SeqTime.Add((CurTime.Hour * 10000000) + (CurTime.Minute * 100000) + (CurTime.Second * 1000) + (CurTime.Millisecond));
+                MarkSeq.Add(CurSeq);
+                LastSeq = CurSeq;
+            }*/
+            string SmplStat = "3";
+            try
+            {
+                SmplStat = Itri2Fanuc.FrqRpnsRead(CncHndl, 1);
+            }
+            catch
+            {
+                MessageBox.Show("Memory Error(Please reboot CNC)", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                timer2.Enabled = false;
+            }
+            if (SmplStat.Equals("1"))
+            {
+                if (DataIndex == 0)
+                {
+                    string FrqAxis = CB_FrqAxis.SelectedItem.ToString();
+                    Smplsw.Write(FrqAxis + "-FREQ(Hz)\t" + FrqAxis + "-FRTCM(%)\t" + FrqAxis + "-TCMD(%)\t" +
+                        FrqAxis + "-POSF(mm)\tSamplingRate:" + NumUpDown_Sampling.Value + "ms");
+                    Smplsw.Write("\r\n");
+                }
+
+                for (int i = 0; i < Itri2Fanuc.DataLength; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        if (j == 0)
+                            Smplsw.Write(Itri2Fanuc.CollectData[j, i]);
+                        else
+                            Smplsw.Write("\t" + Itri2Fanuc.CollectData[j, i]);
+                    }
+                    Smplsw.Write("\r\n");
+                    DataIndex++;
+                }
+            }
+            else if (SmplStat.Equals("0"))
+            {
+                SmplStat = Itri2Fanuc.SamplingEnd(CncHndl);
+                TB_ConStatus.Text = "FrequencyResponse End";
+                Smplsw.Close();
+                Smplsw.Dispose();
+                timer2.Enabled = false;
+                return;
+            }
+            else
+                TB_ConStatus.Text = SmplStat;
+        }
+
+        private void Btn_FrqResEnd_Click(object sender, EventArgs e)
+        {
+            /*string ret = mts.FrqResponseEnd(CncHndl, 1);
+            if (ret.Equals("Stop input disturbance"))
+            {
+                Btn_FrqResStart.Enabled = true;
+                Btn_FrqResEnd.Enabled = false;
+            }*/
+            Smplsw.Close();
+            Smplsw.Dispose();
+            Itri2Fanuc.SamplingCancel(CncHndl);
+            Itri2Fanuc.SamplingEnd(CncHndl);
+            timer2.Enabled = false;
+        }
+        
+        private void Btn_PlotFreq_Click(object sender, EventArgs e)
+        {
+            FormPlotYT form3 = new FormPlotYT();
+            form3.ShowDialog(this);
+            if (!TB_ConStatus.Text.Equals("Disconnect"))
+                TB_ConStatus.Text = "Connect";
+        }
+
+        private void Btn_PlotXY_Click(object sender, EventArgs e)
+        {
+            FormPlotXY form2 = new FormPlotXY();
+            form2.ShowDialog(this);
+            if (!TB_ConStatus.Text.Equals("Disconnect"))
+                TB_ConStatus.Text = "Connect";
+        }
+
+        private void Btn_PlotYT_Click(object sender, EventArgs e)
+        {
+            FormPlotYT form3 = new FormPlotYT();
+            form3.ShowDialog(this);
+            if (!TB_ConStatus.Text.Equals("Disconnect"))
+                TB_ConStatus.Text = "Connect";
+        }
+    }
+}
