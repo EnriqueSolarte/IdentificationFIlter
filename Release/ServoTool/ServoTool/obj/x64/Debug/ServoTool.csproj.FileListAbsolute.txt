@@ -49,3 +49,6 @@ C:\Users\user\Desktop\success\new\ServoTool\ServoTool\obj\x64\Debug\ServoTool.pd
 D:\Documents\Fanuc Servo guide\Realese\ServoTool\ServoTool\bin\x64\Debug\ServoTool.exe.config
 D:\Documents\Fanuc Servo guide\Realese\ServoTool\ServoTool\obj\x64\Debug\ServoTool.exe
 D:\Documents\Fanuc Servo guide\Realese\ServoTool\ServoTool\obj\x64\Debug\ServoTool.pdb
+D:\GitHub\IdentificationFIlter\Realese\ServoTool\ServoTool\bin\x64\Debug\ServoTool.exe.config
+D:\GitHub\IdentificationFIlter\Realese\ServoTool\ServoTool\obj\x64\Debug\ServoTool.exe
+D:\GitHub\IdentificationFIlter\Realese\ServoTool\ServoTool\obj\x64\Debug\ServoTool.pdb
