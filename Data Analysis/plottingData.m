@@ -1,20 +1,20 @@
-function plottingData(FrequencyResponseServoguide,TimeResponseOwnsoftware,FrequencyResponseOwnsoftware)
+function plottingData(FrequencyResponseServoguide,TimeResponseOwnsoftware)
   %Data in Frequency Domain from servoguide
     SG_FREQUENCY=FrequencyResponseServoguide(:,2);
     SG_GAIN=FrequencyResponseServoguide(:,3);
     SG_PHASE=FrequencyResponseServoguide(:,4);
     
-  %Data in Time Domain from own software
-    OS_TCMD=TimeResponseOwnsoftware(:,1);
-    OS_FRTCM=TimeResponseOwnsoftware(:,2);
-    OS_FREQUENCY=TimeResponseOwnsoftware(:,3);
-    OS_TIME=0:0.25:(length(OS_FREQUENCY)-1)*0.25;
-  
-  %Data in Frequency Domain from own software
-    OS_FREQUENCY=FrequencyResponseOwnsoftware(:,1);
-    OS_GAIN=FrequencyResponseOwnsoftware(:,2);
-    OS_PHASE=FrequencyResponseOwnsoftware(:,3);
- 
+%  %Data in Time Domain from own software
+%    OS_TCMD=TimeResponseOwnsoftware(:,1);
+%    OS_FRTCM=TimeResponseOwnsoftware(:,2);
+%    OS_FREQUENCY=TimeResponseOwnsoftware(:,3);
+%    OS_TIME=0:0.25:(length(OS_FREQUENCY)-1)*0.25;
+%  
+%  %Data in Frequency Domain from own software
+%    OS_FREQUENCY=FrequencyResponseOwnsoftware(:,1);
+%    OS_GAIN=FrequencyResponseOwnsoftware(:,2);
+%    OS_PHASE=FrequencyResponseOwnsoftware(:,3);
+% 
 
   %Plotting Time Domain 
     %Plotting OS_TCMD
