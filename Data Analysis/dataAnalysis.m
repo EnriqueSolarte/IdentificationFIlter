@@ -4,9 +4,9 @@ pkg load signal
 %Reading ServoGuide Files
   FrequencyResponseServoguide=csvread('ServoGuideFrequencyResponse.csv');
   %Data from servoguide file_in_loadpath
-    SG_PHASE = FrequencyResponseServoguide(:,4);
-    SG_GAIN = FrequencyResponseServoguide(:,3);
-    SG_FREQUENCY = FrequencyResponseServoguide(:,2);
+    SG_PHASE = FrequencyResponseServoguide([5:end],4);
+    SG_GAIN = FrequencyResponseServoguide([5:end],3);
+    SG_FREQUENCY = FrequencyResponseServoguide([5:end],2);
 
 %Reading Own Software File
   TimeResponseOwnsoftware=csvread('SoftwareTimeResponse.csv');   
@@ -16,6 +16,7 @@ pkg load signal
     OS_FREQUENCY=TimeResponseOwnsoftware([2023:47677],3);
     OS_TIME=0:0.25:(length(OS_FREQUENCY)-1)*0.25;
 
+% Own-software analysis
 if false
   figure
   subplot(3,3,1)
@@ -147,6 +148,7 @@ for i=1:length(OS_FREQUENCY)
       u = 2*uT(1:n/2+1);
       u(1:end-1) = u(1:end-1);
       max_OS_TCMD = max(u);
+      auxu = sort(u);
       
       uT = fft(aux_OS_TCMD_BUTTER)/n;
       u = 2*uT(1:n/2+1);
