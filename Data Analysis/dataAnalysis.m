@@ -167,29 +167,81 @@ for i=1:length(OS_FREQUENCY)
 end
 MAXS = [MAXS;FREQUENCIES(j), max_OS_FRTCM, max_OS_TCMD, max_OS_TCMD_BUTTER];
 
-% Plotting Bode Diagram
-  %Plotting results after handling data
-  H = MAXS(:,3)./MAXS(:,2);
-  f = MAXS(:,1);
-  MagData = 20*log10(abs(H));
-  PhaseData = angle(H)*180/pi-100;
+% Preparing Bode Diagram
+H = MAXS(:,3)./MAXS(:,2);
+f = MAXS(:,1);
+MagData = 20*log10(abs(H));
+PhaseData = angle(H)*180/pi-100;
+
+%  H2 = PhaseData;
+%  threshold = max(abs(PhaseData))/10;
+%  H2(abs(PhaseData)<threshold) = 0;
+%  PhaseData = H2;
+
+% Extract frequencies to be filtered
+j=1;
+for i=1:208
+  if f(i)>=350
+    auxf(j)=f(i);
+    auxPD(j)=PhaseData(i);
+    if j==1
+      index = i;
+    end
+    j=j+1;
+  end
+end
+
+%Kalman Filter
+Xest=[PhaseData(index-1)];
+Pest=[1];
+Z=auxPD;
+R = 1;
+Q = 0.1;
+
+for i = 1:length(auxPD)
+  % Prediction
+  Xestm(i) = Xest(i);
+  Pestm(i) = Pest(i)+Q;
+  % Correction
+  K(i) = Pestm(i)/(Pestm(i) + R);
+  Xest(i+1)=Xestm(i) + K(i)*(Z(i)-Xestm(i));
+  Pest(i+1)=(1-K(i))*Pestm(i);
+end
+
+PhaseData1 = PhaseData;
+PhaseData1(index:length(PhaseData1)) = Xest(2:end);
+
   figure
-  subplot(2,2,1)
+  subplot(2,3,1)
   semilogx(f,MagData)
   title('Magnitude')
   grid
-  subplot(2,2,3)
+  subplot(2,3,4)
   semilogx(f,PhaseData)
   title('Phase')
   grid
 
   %Plotting results from servoguide
-  subplot(2,2,2)
+  subplot(2,3,2)
   semilogx(SG_FREQUENCY,SG_GAIN,'r')
   title('Magnitude (Servoguide)')
   grid
-  subplot(2,2,4)
+  subplot(2,3,5)
   semilogx(SG_FREQUENCY,SG_PHASE,'r')
   title('Phase (Servoguide)')
   grid
-  clear all
+  
+  subplot(2,3,3)
+  semilogx(f,MagData)
+  title('Magnitude')
+  hold on 
+  semilogx(SG_FREQUENCY,SG_GAIN,'r')
+  grid
+  subplot(2,3,6)
+  semilogx(f,PhaseData1)
+  title('Phase')
+  hold on
+  semilogx(SG_FREQUENCY,SG_PHASE,'r')
+  grid
+  
+%  clear all
