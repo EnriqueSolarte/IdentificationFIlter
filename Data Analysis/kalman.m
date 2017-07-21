@@ -15,15 +15,15 @@ for i=1:208
   end
 end
 
-Xest=[PhaseData(index-1)];
-%Xest = [0]
+%Xest=[PhaseData(index-1)];
+Xest = [0];
 Pest=[1];
-Z=auxPD;
-%Z= VALUE;
-R = 0.1;
-Q = 0.01;
+%Z=auxPD;
+Z= OS_TCMD;
+R = 1;
+Q = 0.1;
 
-for i = 1:length(auxPD)
+for i = 1:length(OS_TCMD)
   % Prediction
   Xestm(i) = Xest(i);
   Pestm(i) = Pest(i)+Q;
@@ -33,15 +33,19 @@ for i = 1:length(auxPD)
   Pest(i+1)=(1-K(i))*Pestm(i);
 end
 
-PhaseData1 = PhaseData;
-PhaseData1(index:length(PhaseData1)) = Xest(2:end);
+%PhaseData1 = PhaseData;
+%PhaseData1(index:length(PhaseData1)) = Xest(2:end);
+PhaseData1 = Xest;
 
 %PhaseData = Xest(2:end);
 figure
 %  subplot(2,3,6)
-  semilogx(f,PhaseData1)
-  title('Phase')
-  hold on
-  semilogx(SG_FREQUENCY,SG_PHASE,'r')
-  grid
-  hold off
+%semilogx(f,PhaseData1)
+%title('Phase')
+%hold on
+%semilogx(SG_FREQUENCY,SG_PHASE,'r')
+%grid
+%hold off
+plot(OS_TCMD,'r')
+hold on
+plot(PhaseData1(2:end),'b')
