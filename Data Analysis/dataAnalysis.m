@@ -57,14 +57,12 @@ for i=1:length(OS_FREQUENCY)
   else
     n = length(aux_OS_FRTCM);
     
-    uT = fft(aux_OS_FRTCM)/n;
-    u = 2*uT(1:n/2+1);
-    u(1:end-1) = u(1:end-1);
+    uT = fft(aux_OS_FRTCM);
+    u = 2/n*uT(1:n/2);
     max_OS_FRTCM = max(u);
 
-    uT = fft(aux_OS_TCMD)/n;
-    u = 2*uT(1:n/2+1);
-    u(1:end-1) = u(1:end-1);
+    uT = fft(aux_OS_TCMD);
+    u = 2/n*uT(1:n/2);
     max_OS_TCMD = max(u);
 
 % Plotting frequency spectrum per each batch
@@ -83,6 +81,7 @@ for i=1:length(OS_FREQUENCY)
     j=j+1;
   end
 end
+
 MAXS = [MAXS;FREQUENCIES(j), max_OS_FRTCM, max_OS_TCMD];
 
 % Preparing Bode Diagram
