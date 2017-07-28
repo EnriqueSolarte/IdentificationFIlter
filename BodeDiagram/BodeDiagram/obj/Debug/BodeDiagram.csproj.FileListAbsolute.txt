@@ -1,0 +1,13 @@
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\BodeDiagram.exe.config
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\BodeDiagram.exe
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\BodeDiagram.pdb
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\MathNet.Numerics.dll
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\MathNet.Numerics.xml
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\obj\Debug\BodeDiagram.csprojResolveAssemblyReference.cache
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\obj\Debug\BodeDiagram.Form1.resources
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\obj\Debug\BodeDiagram.Properties.Resources.resources
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\obj\Debug\BodeDiagram.csproj.GenerateResource.Cache
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\obj\Debug\BodeDiagram.exe
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\obj\Debug\BodeDiagram.pdb
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\CsvHelper.dll
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\CsvHelper.xml

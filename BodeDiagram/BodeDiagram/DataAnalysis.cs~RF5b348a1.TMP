@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using CsvHelper;
+
+namespace BodeDiagram
+{
+    class DataAnalysis
+    {
+        public DataAnalysis()
+        {
+
+        }
+
+        public void readCSV(TextReader file)
+        {
+            var csv = new CsvReader(file);
+
+            //IEnumerable<DataRecord> records = csv.GetRecord<DataRecord>();
+            while(csv.Read())
+            {
+                var OS_TCMD = csv.GetField<double>(0);
+                var OS_FRTCM = csv.GetField<double>(1);
+                var OS_FREQUENCY = csv.GetField<double>(2);
+            }
+        }
+
+    }
+}
