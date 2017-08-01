@@ -88,7 +88,41 @@ MAXS = [MAXS;FREQUENCIES(j), max_OS_FRTCM, max_OS_TCMD];
 H = MAXS(:,3)./MAXS(:,2);
 f = MAXS(:,1);
 MagData = 20*log10(abs(H));
-PhaseData = angle(H)*180/pi;
+
+x = real(H);
+y = imag(H);
+
+for i = 1:length(x)
+  if x(1)>0
+    v(i)=atan(y(i)/x(i));
+  end
+  
+  if y(i)>=0 && x(i)<0
+    v(i)=pi+atan(y(i)/x(i));
+  end
+  
+  if y(i)<0 && x(i)<0
+    v(i)=-pi+atan(y(i)/x(i));
+  end
+  
+  if y(i)>0 && x(i)==0
+    v(i)=pi/2;
+  end
+  
+  if y(i)<0 && x(i)==0
+    v(i)=-pi/2;
+  end
+  
+  if y(i)==0 && x(i)==0
+    v(i) = 0;
+  end
+  
+  if v(i)<0
+    v(i)=v(i)+2*pi;
+  end
+end
+
+PhaseData = -(2*pi-v)*180/pi;
 
 % Extract frequencies to be filtered
 j=1;
