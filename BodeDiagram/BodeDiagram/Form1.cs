@@ -19,7 +19,7 @@ namespace BodeDiagram
     public partial class Form1 : Form
     {
         DataAnalysis data = new DataAnalysis();
-        public string filename = @"C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\SoftwareTimeResponse1.csv";
+        public string filename = "SoftwareTimeResponse1.csv";
 
         public Form1()
         {

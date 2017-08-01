@@ -52,3 +52,17 @@ D:\Documents\Fanuc Servo guide\Realese\ServoTool\ServoTool\obj\x64\Debug\ServoTo
 D:\GitHub\IdentificationFIlter\Realese\ServoTool\ServoTool\bin\x64\Debug\ServoTool.exe.config
 D:\GitHub\IdentificationFIlter\Realese\ServoTool\ServoTool\obj\x64\Debug\ServoTool.exe
 D:\GitHub\IdentificationFIlter\Realese\ServoTool\ServoTool\obj\x64\Debug\ServoTool.pdb
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\bin\x64\Debug\ServoTool.exe.config
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.exe
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.pdb
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\bin\x64\Debug\ServoTool.exe
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\bin\x64\Debug\ServoTool.pdb
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.csprojResolveAssemblyReference.cache
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.FormMTS.resources
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.FormPlotBode.resources
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.FormPlotYT.resources
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.FormProgram.resources
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.ServoTool.resources
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.FormPlotXY.resources
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.Properties.Resources.resources
+D:\GitHub\IdentificationFIlter\Release\ServoTool\ServoTool\obj\x64\Debug\ServoTool.csproj.GenerateResource.Cache
