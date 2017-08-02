@@ -122,11 +122,15 @@ namespace BodeDiagram
         private void dataTrans()
         {
             Complex[] H = new Complex[MAX_OS_FRTCM_LIST.Count];
+            double v = 0;
             for (int i = 0; i < MAX_OS_FRTCM_LIST.Count; i++)
             {
                 H[i] = Complex.Divide(MAX_OS_FRTCM_LIST[i], MAX_OS_TCMD_LIST[i]);
                 MAGNITUDE_BODE.Add(-20.0 * Math.Log10(H[i].Magnitude));
-                PHASE_BODE.Add((Math.Atan2(H[i].Imaginary, H[i].Real)) * -180.0 / Math.PI);
+                v = Math.Atan2(H[i].Imaginary, H[i].Real);
+                if (v < 0)
+                    v = v + 2 * Math.PI;
+                PHASE_BODE.Add(-v*180/Math.PI);
             }
             FREQUENCY_BODE = FREQUENCIES_LIST;
         }
