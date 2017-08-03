@@ -15,6 +15,7 @@ TimeResponseOwnsoftware=csvread('SoftwareTimeResponse.csv');
   OS_FRTCM=TimeResponseOwnsoftware([2023:47677],2);
   OS_FREQUENCY=TimeResponseOwnsoftware([2023:47677],3);
   OS_TIME=0:0.25:(length(OS_FREQUENCY)-1)*0.25;
+  
 
 % Extracting frequencies range
 j=1;
@@ -88,7 +89,13 @@ MAXS = [MAXS;FREQUENCIES(j), max_OS_FRTCM, max_OS_TCMD];
 H = MAXS(:,3)./MAXS(:,2);
 f = MAXS(:,1);
 MagData = 20*log10(abs(H));
-PhaseData = angle(H)*180/pi;
+PhaseData = atan2(imag(H),real(H));
+for i=1:length(PhaseData)
+  if PhaseData(i) < 0 
+    PhaseData(i) = PhaseData(i) + 2*pi;
+  end
+end
+PhaseData = (PhaseData-2*pi)*180/pi;
 
 % Extract frequencies to be filtered
 j=1;
