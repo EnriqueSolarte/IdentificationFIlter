@@ -7,19 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using MathNet.Numerics;
-using MathNet.Numerics.IntegralTransforms;
-using System.Numerics;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.IO;
-
 
 namespace BodeDiagram
 {
     public partial class Form1 : Form
     {
-        DataAnalysis data = new DataAnalysis();
-        public string filename = "SoftwareTimeResponse1.csv";
+        DataAnalysisCW data = new DataAnalysisCW();
+        public string filename = "ServoguideTimeResponse1.csv";
 
         public Form1()
         {
@@ -34,6 +30,7 @@ namespace BodeDiagram
             }
             PlotFFT(data.MAGNITUDE_BODE, data.PHASE_BODE, data.FREQUENCY_BODE);
             data.clearPlottingData();
+
         }
 
         public void PlotFFT(List<double> Magnitude, List<double> Phase, List<double> Frequency)

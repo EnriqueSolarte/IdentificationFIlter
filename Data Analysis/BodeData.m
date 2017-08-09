@@ -81,5 +81,6 @@ for i = 1:length(x)
 end
 
 PhaseData = (v-2*pi)*180/pi;
+PhaseData = PhaseData';
 
 

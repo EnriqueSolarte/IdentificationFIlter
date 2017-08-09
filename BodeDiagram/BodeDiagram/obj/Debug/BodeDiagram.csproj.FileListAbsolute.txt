@@ -11,3 +11,4 @@ C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\ob
 C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\obj\Debug\BodeDiagram.pdb
 C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\CsvHelper.dll
 C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\CsvHelper.xml
+C:\Users\533597\Documents\GitHub\IdentificationFIlter\BodeDiagram\BodeDiagram\bin\Debug\Core.dll

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.IO;
 using CsvHelper;
 using MathNet.Numerics.IntegralTransforms;
-using System.Numerics;
+using Mechatronics.MathToolBox;
 
 namespace BodeDiagram
 {
-    class DataAnalysis
+    class DataAnalysisCW
     {
         private List<double> OS_TCMD_LIST { get; set; }
         private List<double> OS_FRTCM_LIST { set; get; }
@@ -52,9 +52,9 @@ namespace BodeDiagram
             double TCMD_MAX = 0;
             int INDEX_FRTCM_MAX = 0;
             int INDEX_TCMD_MAX = 0;
-            Complex[] u_AUX_OS_FRTCM = new Complex[0];
-            Complex[] u_AUX_OS_TCMD = new Complex[0];
 
+            List<Complex> u_AUX_OS_FRTCM = new List<Complex>();
+            List<Complex> u_AUX_OS_TCMD = new List<Complex>();
             List<Double> AUX_OS_TCMD = new List<double>();
             List<Double> AUX_OS_FRTCM = new List<double>();
             for (int i = 0; i<OS_FREQUENCY_LIST.Count; i++)
@@ -68,25 +68,28 @@ namespace BodeDiagram
                 {
                     int n = AUX_OS_FRTCM.Count;
 
-                    Complex[] uT_AUX_OS_FRTCM = new Complex[n];
-                    Complex[] uT_AUX_OS_TCMD  = new Complex[n];
+                    Double[] uT_AUX_OS_FRTCM_REAL = new Double[n];
+                    Double[] uT_AUX_OS_FRTCM_IMAG = new Double[n];
+                    Double[] uT_AUX_OS_TCMD_REAL  = new Double[n];
+                    Double[] uT_AUX_OS_TCMD_IMAG  = new Double[n];
 
                     for (int k = 0; k < n; k++)
                     {
-                        uT_AUX_OS_FRTCM[k] = new Complex(AUX_OS_FRTCM[k], 0);
-                        uT_AUX_OS_TCMD[k]  = new Complex(AUX_OS_TCMD[k], 0);
+                        uT_AUX_OS_FRTCM_REAL[k] = AUX_OS_FRTCM[k];
+                        uT_AUX_OS_FRTCM_IMAG[k] = 0;
+                        uT_AUX_OS_TCMD_REAL[k]  = AUX_OS_TCMD[k];
+                        uT_AUX_OS_TCMD_IMAG[k]  = 0;
                     }
 
-                    Fourier.Forward(uT_AUX_OS_FRTCM, FourierOptions.NoScaling);
-                    Fourier.Forward(uT_AUX_OS_TCMD, FourierOptions.NoScaling);
-
-                    u_AUX_OS_FRTCM = new Complex[n];
-                    u_AUX_OS_TCMD = new Complex[n];
+                    Fourier.Forward(uT_AUX_OS_FRTCM_REAL, uT_AUX_OS_FRTCM_IMAG, FourierOptions.NoScaling);
+                    Fourier.Forward(uT_AUX_OS_TCMD_REAL, uT_AUX_OS_TCMD_IMAG, FourierOptions.NoScaling);
 
                     for (int k = 0; k < n / 2; k++)
                     {
-                        u_AUX_OS_FRTCM[k] = 2.0 / n * uT_AUX_OS_FRTCM[k];
-                        u_AUX_OS_TCMD[k]  = 2.0 / n * uT_AUX_OS_TCMD[k];
+                        Complex AUX = new Complex(2.0 / n * uT_AUX_OS_FRTCM_REAL[k], 2.0 / n * uT_AUX_OS_FRTCM_IMAG[k]);
+                        u_AUX_OS_FRTCM.Add(AUX);
+                        AUX = new Complex(2.0 / n * uT_AUX_OS_TCMD_REAL[k], 2.0 / n * uT_AUX_OS_TCMD_IMAG[k]);
+                        u_AUX_OS_TCMD.Add(AUX);
                     }
 
                     double[] MAG_u_AUX_OS_FRTCM = new double[n];
@@ -94,12 +97,12 @@ namespace BodeDiagram
 
                     for(int k = 0; k < n / 2; k++)
                     {
-                        MAG_u_AUX_OS_FRTCM[k] =  u_AUX_OS_FRTCM[k].Magnitude;
-                        MAG_u_AUX_OS_TCMD[k] =  u_AUX_OS_TCMD[k].Magnitude;
+                        MAG_u_AUX_OS_FRTCM[k] = u_AUX_OS_FRTCM[k].Mag;
+                        MAG_u_AUX_OS_TCMD[k]  = u_AUX_OS_TCMD[k].Mag;
                     }
 
                     FRTCM_MAX = MAG_u_AUX_OS_FRTCM.Max();
-                    TCMD_MAX = MAG_u_AUX_OS_TCMD.Max();
+                    TCMD_MAX  = MAG_u_AUX_OS_TCMD.Max();
                     INDEX_FRTCM_MAX = MAG_u_AUX_OS_FRTCM.ToList().IndexOf(FRTCM_MAX);
                     INDEX_TCMD_MAX = MAG_u_AUX_OS_TCMD.ToList().IndexOf(TCMD_MAX);
 
@@ -108,6 +111,8 @@ namespace BodeDiagram
 
                     AUX_OS_TCMD.Clear();
                     AUX_OS_FRTCM.Clear();
+                    u_AUX_OS_FRTCM.Clear();
+                    u_AUX_OS_TCMD.Clear();
 
                     AUX_OS_TCMD.Add(OS_TCMD_LIST[i]);
                     AUX_OS_FRTCM.Add(OS_FRTCM_LIST[i]);
@@ -118,21 +123,24 @@ namespace BodeDiagram
 
         private void dataTrans()
         {
-            Complex[] H = new Complex[MAX_OS_FRTCM_LIST.Count];
-            double v = 0;
             for (int i = 0; i < MAX_OS_FRTCM_LIST.Count; i++)
             {
-                H[i] = Complex.Divide(MAX_OS_FRTCM_LIST[i], MAX_OS_TCMD_LIST[i]);
-                MAGNITUDE_BODE.Add(-20.0 * Math.Log10(H[i].Magnitude));
-                v = Math.Atan2(H[i].Imaginary, H[i].Real);
-                if (v < 0)
-                    v = v + 2 * Math.PI;
-                PHASE_BODE.Add(-v*180/Math.PI);
+                Complex H = new Complex();
+                H.Real = ((MAX_OS_FRTCM_LIST[i].Real * MAX_OS_TCMD_LIST[i].Real) + (MAX_OS_FRTCM_LIST[i].Imag * MAX_OS_TCMD_LIST[i].Imag)) / (Math.Pow(MAX_OS_TCMD_LIST[i].Real, 2) + Math.Pow(MAX_OS_TCMD_LIST[i].Imag, 2));
+                H.Imag = ((MAX_OS_FRTCM_LIST[i].Imag * MAX_OS_TCMD_LIST[i].Real) - (MAX_OS_FRTCM_LIST[i].Real * MAX_OS_TCMD_LIST[i].Imag)) / (Math.Pow(MAX_OS_TCMD_LIST[i].Real, 2) + Math.Pow(MAX_OS_TCMD_LIST[i].Imag, 2));
+                MAGNITUDE_BODE.Add(-20.0 * Math.Log10(H.Mag));
+
+                double v = -H.Phs;
+                PHASE_BODE.Add(v);
+                //double v = Math.Atan2(H.Imag, H.Real);
+                //if (v < 0)
+                //    v = v + 2 * Math.PI;;
+                //PHASE_BODE.Add(-v * 180 / Math.PI);
             }
             FREQUENCY_BODE = FREQUENCIES_LIST;
         }
 
-        public DataAnalysis()
+        public DataAnalysisCW()
         {
             OS_TCMD_LIST = new List<double>();
             OS_FRTCM_LIST = new List<double>();
