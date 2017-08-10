@@ -3,15 +3,14 @@ clear, close all, clc
 if true
   cd 'Data CW'
 %  [HM_GAIN, HM_PHASE, HM_FREQ] = BodeData('SoftwareTimeResponse1.csv');
-    file = csvread('ServoGuideFrequencyResponse1.csv');
+    file = csvread('Frequency_Response_Axis-2_1_-_1000Hz_VG500.csv');
     HM_FREQ  = file([5:end],2);
     HM_PHASE = file([5:end],4);
     HM_GAIN  = file([5:end],3);
   cd ..
-    
+  
   # ##### PHASE MARGIN #####
   gain_threshold = 0;
-  j = 2;
   cross_gain = [0, 0, 0];
   HM_GAIN = HM_GAIN .+ 3;
   for i = 1:length(HM_GAIN)-1
@@ -21,7 +20,7 @@ if true
       end
     end
   end  
-  cross_gain(1,:) = [];
+  cross_gain(1,:) = []; 
   
   if isempty(cross_gain)
     phase_margin = inf;
@@ -48,6 +47,7 @@ if true
   # ##### GAIN MARGIN #####
   phase_threshold = 0;
   cross_phase = [0, 0, 0];
+  HM_GAIN = HM_GAIN .- 3;
   HM_PHASE = HM_PHASE .+ 180;
   for i = 1:length(HM_PHASE)-1
     if (sign(HM_PHASE(i)) != sign(HM_PHASE(i+1)))
@@ -63,14 +63,14 @@ if true
     freq_phase = inf;
     gain_MG = 0;
     else
-    for i = 1:length(cross_phase(:,1))
+    for i = 1:length(cross_phase(:,1));
       a = HM_GAIN(cross_phase(i,1));
       b = HM_GAIN(cross_phase(i,1)+1);
       c = (a + b)/2;
-      if c > -3
-        gain_margin(i,1) = +(+ 3 - c);
+      if c > 0
+        gain_margin(i,1) = + c;
         else
-        gain_margin(i,1) = -(- 3 + c);
+        gain_margin(i,1) = - c;
       end
       freq_phase(i,1) = (cross_phase(i,2) + cross_phase(i,3))/2;
     end
@@ -81,14 +81,14 @@ if true
   
   if true
     HM_PHASE = HM_PHASE .- 180;
-    HM_GAIN = HM_GAIN .- 3;
+%    HM_GAIN = HM_GAIN .- 3;
     R = 2;
     C = 1;
     subplot(R,C,1);
     hold on;
     semilogx(HM_FREQ, HM_GAIN);
     title('Magnitude');
-    line([FGM, FGM], [-3, -GM]);
+    line([FGM, FGM], [0, -GM]);
     line([1, 1000], [-3, -3],'Color','red','LineStyle','--');
     label = ['GM: ', num2str(GM), ', Freq: ', num2str(FGM)];
     if FGM == inf
